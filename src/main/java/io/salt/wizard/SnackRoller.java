@@ -1,0 +1,66 @@
+package io.salt.wizard;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+
+public class SnackRoller {
+	private static final Logger _logger = LoggerFactory.getLogger(SnackRoller.class);
+	
+	private static JsonArray snacks;
+	
+	private static double totalPercentage = 0;
+	private static Map<Integer, Double> snackVal;
+	
+	public static void init(JsonArray ja) {
+		snackVal = new HashMap<Integer, Double>();
+		snacks = ja;
+		snacks.forEach(obj -> {
+			JsonObject snack = (JsonObject) obj;
+			snackVal.put(snack.getInteger("snackId"), totalPercentage += snack.getDouble("rarity"));
+		});
+		// Print out list of snacks and their values in trace.
+		// Final snack should equal 1! Modifications should be done against the database!
+		snackVal.forEach((snackId, snackVal) -> {
+			_logger.trace("snackId :: {}, snackVal :: {}", snackId, snackVal);
+		});
+	}
+	
+	/**
+	 * Roll for a random number to redeem a snack!
+	 * @return snack details
+	 */
+	public static synchronized JsonObject rollForSnack() {
+		
+		// TODO - Might need to have a unique Math.random() for each thread later
+		double roll = Math.random();
+		//_logger.trace("Current roll :: {}", roll);
+		
+		int result = 0;
+		for(Map.Entry<Integer, Double> entry : snackVal.entrySet()) {
+			if( roll < entry.getValue()) {
+				result = entry.getKey();
+				break;
+			}
+		}
+		//_logger.trace("Result :: {}", result);
+		
+		JsonObject snack = null;
+		// Search for the key in the JsonArray to get the snack details
+		for(Object obj : snacks) {
+			JsonObject jo = (JsonObject) obj;
+			if(result == jo.getInteger("snackId")) {
+				snack = jo;
+				//_logger.trace("Returning the following snack :: {}", snack.encodePrettily());
+				break;
+			}
+		}
+		
+		return snack;
+	}
+}

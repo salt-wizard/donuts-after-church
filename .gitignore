@@ -1,4 +1,8 @@
 target/
+logs/
+tokens/
+.settings/
+dbconfig/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
