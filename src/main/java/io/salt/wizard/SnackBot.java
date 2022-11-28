@@ -18,7 +18,9 @@ import io.salt.wizard.actions.TokenHandler;
 import io.salt.wizard.db.HikariCPProvider;
 import io.salt.wizard.db.SnacksDAO;
 import io.salt.wizard.db.UserDAO;
+import io.salt.wizard.db.UserSnacksDAO;
 import io.salt.wizard.pages.DebugPage;
+import io.salt.wizard.pages.RollPage;
 import io.salt.wizard.pages.MainMenu;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -91,6 +93,7 @@ public class SnackBot extends ListenerAdapter {
 					.build();
 			
 			jda.upsertCommand(SlashCommands.MENU, "This bot returns info").queue();
+			jda.upsertCommand(SlashCommands.ROLL, "Give a token for a random donut.").queue();
 			jda.upsertCommand(SlashCommands.CREDITS, "Return credits").queue();
 			jda.upsertCommand("debug", "Debug menu - Remove later").queue();
 			
@@ -117,6 +120,9 @@ public class SnackBot extends ListenerAdapter {
 			case SlashCommands.MENU:
 				MainMenu.returnMainMenu(event);
 				break;
+			case SlashCommands.ROLL:
+				RollPage.returnRollPage(event, userDetails);
+				break;
 			case SlashCommands.CREDITS:
 				String author = "Author: salt_wizard#1029";
 				String version = "Version: " + _properties.getProperty("app.version");
@@ -135,25 +141,26 @@ public class SnackBot extends ListenerAdapter {
 		JsonObject userJson = validateUser(event.getUser());
 		
 		switch(event.getComponentId()) {
+			// Debug Page
 			case Buttons.DEBUG_INC_TOKEN_ID:
 				DebugPage.incrementToken(event, userJson);
 				break;
 			case Buttons.DEBUG_DEC_TOKEN_ID:
 				DebugPage.decrementToken(event, userJson);
 				break;	
-			case "page:1":
-				EmbedBuilder eb = new EmbedBuilder();
-				eb.setTitle("Menu 2")
-				.setColor(Color.blue)
-				.setDescription("Test Message")
-				.addField("title of field", "test of field", false)
-				.addBlankField(false);
-				MessageEmbed me = eb.build();
-				
-				event.editMessageEmbeds(me)
-				.setReplace(true)
-				.queue();
+			case Buttons.DEBUG_INC_10_TOKEN_ID:
+				DebugPage.increment10Tokens(event, userJson);
 				break;
+			case Buttons.DEBUG_DEC_10_TOKEN_ID:
+				DebugPage.decrement10Tokens(event, userJson);
+				break;
+			case Buttons.DEBUG_ROLL_DONUT_ID:
+				DebugPage.rollForDonutDebug(event, userJson);
+				break;
+
+			// Roll Page
+				
+				
 			default:
 				return;
 		}
@@ -203,7 +210,10 @@ public class SnackBot extends ListenerAdapter {
 			_logger.trace("User does not have an existing entry in the DB!");
 			_logger.info("Creating new entry for user {}...", _user.getAsTag());
 			userJson = UserDAO.addNewUser(_user);
-			_logger.info("New Snack ID :: {}", userJson.encodePrettily());
+			_logger.info("New user :: {}", userJson.encodePrettily());
+			_logger.info("Creating snack rows for user...");
+			UserSnacksDAO.addNewUserSnacks(userJson.getLong("userId"), SnackRoller.returnSnacks());
+			
 		}
 
 		// If there is a null, return a null

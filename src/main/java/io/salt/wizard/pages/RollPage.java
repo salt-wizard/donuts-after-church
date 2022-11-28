@@ -35,39 +35,45 @@ import net.dv8tion.jda.api.utils.messages.MessageData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
-public class DebugPage {
-	private static final Logger _logger = LoggerFactory.getLogger(DebugPage.class);
+public class RollPage {
+	private static final Logger _logger = LoggerFactory.getLogger(RollPage.class);
 	
 	
 	
-	private static MessageCreateData createDebugPage(GenericEvent event, JsonObject userJson) {	
+	private static MessageCreateData createRollPage(GenericEvent event, JsonObject userJson) {	
 		int tokenCount = userJson.getInteger("tokens");
-		
-		String donuts = getUserSnacks(userJson);
+
 		EmbedBuilder eb = new EmbedBuilder();
-		eb.setTitle("Debug Menu")
-		.setColor(0xc7d8a9)
-		.setDescription("Used for development purposes. Make sure to remove on release.")
-		.addField("Tokens", "Current tokens: **" + tokenCount + "**", false)
-		.addField("Donuts", donuts, false);
-		//.addBlankField(false);
+		eb.setTitle("Donut Gachapon")
+		.setColor(Color.WHITE)
+		.setDescription("Welcome to the Donut Gachapon!")
+		.appendDescription("\n")
+		.appendDescription("\n")
+		.appendDescription("Here is where you can submit 1 token for a random donut.")
+		.appendDescription("\n")
+		.appendDescription("\n")
+		.appendDescription("You can also roll for 10 donuts with 10 tokens.")
+		.appendDescription("\n")
+		.addField("Tokens", "Current tokens: **" + tokenCount + "**", false);
 		MessageEmbed me = eb.build();
 		
-		MessageCreateData data = new MessageCreateBuilder()
-			.addEmbeds(me)
-			.addActionRow(
-				Button.success(Buttons.DEBUG_INC_TOKEN_ID, Buttons.DEBUG_INC_TOKEN_LABEL),	
-				Button.danger(Buttons.DEBUG_DEC_TOKEN_ID, Buttons.DEBUG_DEC_TOKEN_LABEL)
-			)
-			.addActionRow(
-				Button.success(Buttons.DEBUG_INC_10_TOKEN_ID, Buttons.DEBUG_INC_10_TOKEN_LABEL),
-				Button.danger(Buttons.DEBUG_DEC_10_TOKEN_ID, Buttons.DEBUG_DEC_10_TOKEN_LABEL)
-			)
-			.addActionRow(
-				Button.primary(Buttons.DEBUG_ROLL_DONUT_ID, Buttons.DEBUG_ROLL_DONUT_LABEL)
-			)
-			.build();
+		Button rollButton = Button.success(Buttons.ROLL_GET_DONUT_ID, Buttons.ROLL_GET_DONUT_LABEL);
+		Button roll50Button = Button.success("AA", "Spend 40 Tokens");
+		Button cancelButton = Button.secondary("A", "Cancel");
 		
+		MessageCreateData data = null;
+		if(userJson.getInteger("tokens") > 39) {
+			data = new MessageCreateBuilder()
+					.addEmbeds(me)
+					.addActionRow(rollButton, roll50Button, cancelButton)
+					.build();
+		} else {
+			data = new MessageCreateBuilder()
+					.addEmbeds(me)
+					.addActionRow(rollButton, cancelButton)
+					.build();
+		}
+
 		return data;
 	}
 	
@@ -76,9 +82,10 @@ public class DebugPage {
 		
 		String donuts = getUserSnacks(userJson);
 		EmbedBuilder eb = new EmbedBuilder();
-		eb.setTitle("Debug Menu")
-		.setColor(0xc7d8a9)
-		.setDescription("Used for development purposes. Make sure to remove on release.")
+		eb.setTitle("Donut Gachapon")
+		.setColor(Color.WHITE)
+		.setDescription("Welcome to the Donut Gachapon!")
+		
 		.addField("Tokens", "Current tokens: **" + tokenCount + "**", false)
 		.addField("Donuts", donuts, false);
 		//.addBlankField(false);
@@ -107,8 +114,8 @@ public class DebugPage {
 	}
 	
 	
-	public static void returnDebugPage(SlashCommandInteractionEvent event, JsonObject userJson) {
-		MessageCreateData data = createDebugPage(event, userJson);
+	public static void returnRollPage(SlashCommandInteractionEvent event, JsonObject userJson) {
+		MessageCreateData data = createRollPage(event, userJson);
 		event.reply(data).setEphemeral(true).queue();
 		
 		//MessageChannelUnion channel = event.getChannel();
