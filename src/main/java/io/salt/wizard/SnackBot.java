@@ -22,6 +22,7 @@ import io.salt.wizard.db.UserSnacksDAO;
 import io.salt.wizard.pages.DebugPage;
 import io.salt.wizard.pages.RollPage;
 import io.salt.wizard.pages.MainMenu;
+import io.salt.wizard.pages.Page;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -34,6 +35,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 public class SnackBot extends ListenerAdapter {
@@ -92,6 +94,7 @@ public class SnackBot extends ListenerAdapter {
 					.setStatus(OnlineStatus.ONLINE)
 					.build();
 			
+			
 			jda.upsertCommand(SlashCommands.MENU, "This bot returns info").queue();
 			jda.upsertCommand(SlashCommands.ROLL, "Give a token for a random donut.").queue();
 			jda.upsertCommand(SlashCommands.CREDITS, "Return credits").queue();
@@ -109,19 +112,23 @@ public class SnackBot extends ListenerAdapter {
 	 */
 	@Override
 	public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-		User _user = event.getUser();
-		
-		JsonObject userDetails = validateUser(_user);
+		User _user = event.getUser();		
+		JsonObject userJson = validateUser(_user);
 
+		// Creating pages...
+		Page mainMenu = new MainMenu();
+		RollPage rollPage = new RollPage();
+		
+		
 		switch(event.getName()) {
 			case "debug":
-				DebugPage.returnDebugPage(event, userDetails);
+				DebugPage.returnDebugPage(event, userJson);
 				break;
 			case SlashCommands.MENU:
-				MainMenu.returnMainMenu(event);
+				mainMenu.returnPage(event, userJson);
 				break;
 			case SlashCommands.ROLL:
-				RollPage.returnRollPage(event, userDetails);
+				rollPage.returnPage(event, userJson);
 				break;
 			case SlashCommands.CREDITS:
 				String author = "Author: salt_wizard#1029";
@@ -137,8 +144,14 @@ public class SnackBot extends ListenerAdapter {
 	
 	@Override
 	public void onButtonInteraction(ButtonInteractionEvent event) {
-		// Return user making interaction
-		JsonObject userJson = validateUser(event.getUser());
+		User _user = event.getUser();		
+		JsonObject userJson = validateUser(_user);
+
+		// Creating pages...
+		Page mainMenu = new MainMenu();
+		RollPage rollPage = new RollPage();
+		
+		_logger.info("User :: {}", userJson.encodePrettily());
 		
 		switch(event.getComponentId()) {
 			// Debug Page
@@ -158,7 +171,28 @@ public class SnackBot extends ListenerAdapter {
 				DebugPage.rollForDonutDebug(event, userJson);
 				break;
 
+				
+				
+			// Main Page
+			case Buttons.MAIN_TO_ROLL_ID:
+				rollPage.returnPage(event, userJson);
+				break;
+				
+				
+				
 			// Roll Page
+			case Buttons.ROLL_TO_MAIN_ID:
+				mainMenu.returnPage(event, userJson);
+				break;
+			case Buttons.ROLL_GET_DONUT_ID:
+				rollPage.rollForDonut(event, userJson);
+				break;
+			case Buttons.ROLL_AGAIN_DONUT_ID:
+				rollPage.rollForDonut(event, userJson);
+				break;
+				
+				
+				
 				
 				
 			default:

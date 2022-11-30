@@ -4,8 +4,12 @@ import java.awt.Color;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.text.StrSubstitutor;
+import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +31,8 @@ import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.callbacks.IMessageEditCallback;
+import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
@@ -36,71 +42,127 @@ import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 public class RollPage {
-	private static final Logger _logger = LoggerFactory.getLogger(RollPage.class);
+	private final Logger _logger = LoggerFactory.getLogger(RollPage.class);
 	
+	private final String TITLE = "Donut Gachapon";
+	private final String DESCRIPTION_MAIN = 
+		"Welcome to the Donut Gachapon!" +
+		"\n" + 
+		"\n" +
+		"Here is where you can submit 1 token for a random donut.";
 	
+	private final String DESCRIPTION_ROLL_RESULT = 
+		"You received a *${donut}*!" + 
+				"\n" + 
+				"\n";
 	
-	private static MessageCreateData createRollPage(GenericEvent event, JsonObject userJson) {	
-		int tokenCount = userJson.getInteger("tokens");
-
+	private final String TOKEN_FIELD_TITLE = "Tokens";
+	private final String TOKEN_FIELD_DESC = "Current tokens: **${tokens}**";
+	
+	public RollPage() {}
+	
+	/**
+	 * Constructs the embed
+	 * @return
+	 */
+	protected MessageEmbed buildEmbed(Map<String, String> valuesMap) {
 		EmbedBuilder eb = new EmbedBuilder();
-		eb.setTitle("Donut Gachapon")
+		eb.setTitle(TITLE)
 		.setColor(Color.WHITE)
-		.setDescription("Welcome to the Donut Gachapon!")
-		.appendDescription("\n")
-		.appendDescription("\n")
-		.appendDescription("Here is where you can submit 1 token for a random donut.")
-		.appendDescription("\n")
-		.appendDescription("\n")
-		.appendDescription("You can also roll for 10 donuts with 10 tokens.")
-		.appendDescription("\n")
-		.addField("Tokens", "Current tokens: **" + tokenCount + "**", false);
-		MessageEmbed me = eb.build();
+		.setDescription(DESCRIPTION_MAIN)
+		.addField(TOKEN_FIELD_TITLE, (new StringSubstitutor(valuesMap)).replace(TOKEN_FIELD_DESC), false);
+		return eb.build();
+	}
+	
+	private MessageData createPage(GenericEvent event, JsonObject userJson) {	
+		int tokenCount = userJson.getInteger("tokens");
+		Map<String, String> valuesMap = new HashMap<>();
+		valuesMap.put("tokens", tokenCount + "");
+		
+		MessageEmbed me = buildEmbed(valuesMap);
 		
 		Button rollButton = Button.success(Buttons.ROLL_GET_DONUT_ID, Buttons.ROLL_GET_DONUT_LABEL);
-		Button roll50Button = Button.success("AA", "Spend 40 Tokens");
-		Button cancelButton = Button.secondary("A", "Cancel");
+		Button cancelButton = Button.secondary(Buttons.ROLL_TO_MAIN_ID, Buttons.ROLL_TO_MAIN_LABEL);
 		
-		MessageCreateData data = null;
-		if(userJson.getInteger("tokens") > 39) {
-			data = new MessageCreateBuilder()
-					.addEmbeds(me)
-					.addActionRow(rollButton, roll50Button, cancelButton)
+		MessageData data = null;
+		if(event instanceof SlashCommandInteractionEvent) {
+			if(tokenCount > 0) {
+				data = new MessageCreateBuilder()
+						.addEmbeds(me)
+						.addActionRow(rollButton, cancelButton)
+						.build();
+			} else {
+				data = new MessageCreateBuilder()
+						.addEmbeds(me)
+						.addActionRow(cancelButton)
+						.build();
+			}
+		}
+		if(event instanceof ButtonInteractionEvent) {
+			if(tokenCount > 0) {
+				data = new MessageEditBuilder()
+						.setEmbeds(me)
+						.setActionRow(rollButton, cancelButton)
+						.build();
+			} else {
+				data = new MessageEditBuilder()
+						.setEmbeds(me)
+						.setActionRow(cancelButton)
+						.build();
+			}
+		}
+
+		return data;
+	}
+	
+	/**
+	 * Menu is created on slash command, edited on existing message through button interaction.
+	 * @param event
+	 * @param userJson
+	 */
+	public void returnPage(GenericEvent event, JsonObject userJson) {
+		if(event instanceof SlashCommandInteractionEvent) {
+			MessageCreateData data = (MessageCreateData) createPage(event, userJson);
+			((IReplyCallback) event).reply(data).setEphemeral(true).queue();
+		}
+		if(event instanceof ButtonInteractionEvent) {
+			MessageEditData data = (MessageEditData) createPage(event, userJson);
+			((IMessageEditCallback) event).editMessage(data).queue();
+		}
+	}
+	
+	
+	private MessageEditData createRollResultPage(GenericEvent event, JsonObject userJson, String donut) {	
+		int tokenCount = userJson.getInteger("tokens");
+		Map<String, String> valuesMap = new HashMap<>();
+		valuesMap.put("tokens", tokenCount + "");
+		valuesMap.put("donut", donut);
+		
+		EmbedBuilder eb = new EmbedBuilder();
+		eb.setTitle(TITLE)
+		.setColor(Color.WHITE)
+		.setDescription((new StringSubstitutor(valuesMap)).replace(DESCRIPTION_ROLL_RESULT))
+		.addField(TOKEN_FIELD_TITLE, (new StringSubstitutor(valuesMap)).replace(TOKEN_FIELD_DESC), false);
+		MessageEmbed me = eb.build();
+		
+		MessageEditData data = null;
+		if(tokenCount > 0) {
+			data = new MessageEditBuilder()
+					.setEmbeds(me)
 					.build();
 		} else {
-			data = new MessageCreateBuilder()
-					.addEmbeds(me)
-					.addActionRow(rollButton, cancelButton)
+			data = new MessageEditBuilder()
+					.setEmbeds(me)
 					.build();
 		}
 
 		return data;
 	}
 	
-	private static MessageEditData editDebugPage(GenericEvent event, JsonObject userJson) {	
-		int tokenCount = userJson.getInteger("tokens");
-		
-		String donuts = getUserSnacks(userJson);
-		EmbedBuilder eb = new EmbedBuilder();
-		eb.setTitle("Donut Gachapon")
-		.setColor(Color.WHITE)
-		.setDescription("Welcome to the Donut Gachapon!")
-		
-		.addField("Tokens", "Current tokens: **" + tokenCount + "**", false)
-		.addField("Donuts", donuts, false);
-		//.addBlankField(false);
-		MessageEmbed me = eb.build();
-		
-		MessageEditData data = new MessageEditBuilder()
-			.setEmbeds(me)
-			.build();
 
-		return data;
-	}
+
 	
-	
-	
-	private static String getUserSnacks(JsonObject userJson) {
+	private String getUserSnacks(JsonObject userJson) {
 		JsonArray userSnacks = UserSnacksDAO.selectUserSnacksById(userJson.getLong("userId"));
 		StringBuilder donuts = new StringBuilder();
 		
@@ -113,49 +175,37 @@ public class RollPage {
 		return donuts.toString();
 	}
 	
-	
-	public static void returnRollPage(SlashCommandInteractionEvent event, JsonObject userJson) {
-		MessageCreateData data = createRollPage(event, userJson);
-		event.reply(data).setEphemeral(true).queue();
+	public void rollForDonut(ButtonInteractionEvent event, JsonObject userJson) {
+		int tokenCount = userJson.getInteger("tokens");
 		
-		//MessageChannelUnion channel = event.getChannel();
-		//channel.sendMessage("<@" + event.getUser().getId() + "> test").queue();
-	}
-	
-	public static void incrementToken(ButtonInteractionEvent event, JsonObject userJson) {
-		userJson = TokenHandler.incrementToken(userJson, 1);
-		MessageEditData data = editDebugPage(event, userJson);
-		event.editMessage(data).queue();
-	}
-	
-	public static void decrementToken(ButtonInteractionEvent event, JsonObject userJson) {
-		userJson = TokenHandler.decrementToken(userJson, 1);
-		MessageEditData data = editDebugPage(event, userJson);
-		event.editMessage(data).queue();
-	}
-	
-	public static void increment10Tokens(ButtonInteractionEvent event, JsonObject userJson) {
-		userJson = TokenHandler.incrementToken(userJson, 10);
-		MessageEditData data = editDebugPage(event, userJson);
-		event.editMessage(data).queue();
-	}
-	
-	public static void decrement10Tokens(ButtonInteractionEvent event, JsonObject userJson) {
-		userJson = TokenHandler.decrementToken(userJson, 10);
-		MessageEditData data = editDebugPage(event, userJson);
-		event.editMessage(data).queue();
-	}
-	
-	public static void rollForDonutDebug(ButtonInteractionEvent event, JsonObject userJson) {
-		JsonObject snack = SnackRoller.rollForSnack();
-		_logger.debug("Rolled snack :: {}", snack.encodePrettily());
-		long userId = userJson.getLong("userId");
-		int snackId = snack.getInteger("snackId");
-		
-		int snackQuantity = SnackRoller.getSnackQuantity(userId, snackId);
-		userJson = UserSnacksDAO.updateSnackQuantity(userId, snackId, snackQuantity + 1);
+		int snackId = -1;
+		if(tokenCount > 0) {
+			// Decrement token, roll for snack
+			userJson = TokenHandler.decrementToken(userJson, 1);
+			JsonObject snack = SnackRoller.rollForSnack();
 
-		MessageEditData data = editDebugPage(event, userJson);
-		event.editMessage(data).queue();
+			// Update the donut count
+			long userId = userJson.getLong("userId");
+			snackId = snack.getInteger("snackId");
+			int snackQuantity = SnackRoller.getSnackQuantity(userId, snackId);
+			userJson = UserSnacksDAO.updateSnackQuantity(userId, snackId, snackQuantity + 1);
+		}
+
+		// Update Buttons
+		Button rollButton = Button.success(Buttons.ROLL_AGAIN_DONUT_ID, Buttons.ROLL_AGAIN_DONUT_LABEL);
+		Button cancelButton = Button.secondary(Buttons.ROLL_TO_MAIN_ID, Buttons.ROLL_TO_MAIN_LABEL);
+		
+		MessageEditData data = null;
+		if(snackId < 0) {
+			data = createRollResultPage(event, userJson, "null");
+		} else {
+			data = createRollResultPage(event, userJson, SnackRoller.getSnackName(snackId));
+		}
+		
+		if(userJson.getInteger("tokens") > 0) {
+			event.editMessage(data).setActionRow(rollButton, cancelButton).queue();
+		} else {
+			event.editMessage(data).setActionRow(cancelButton).queue();
+		}
 	}
 }

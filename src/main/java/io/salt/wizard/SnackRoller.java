@@ -43,25 +43,28 @@ public class SnackRoller {
 	 */
 	public static synchronized JsonArray getFullUserSnacks(JsonArray userSnacks) {
 		JsonArray fullSnacks = new JsonArray();
-		
 		for(Object obj1 : snacks) {
 			for(Object obj2 : userSnacks) {
 				JsonObject snackDetail = (JsonObject) obj1;
 				JsonObject userSnack = (JsonObject) obj2;
 				if(snackDetail.getInteger("snackId") == userSnack.getInteger("snackId")){
-					
-					_logger.trace("snackDetail :: {}", snackDetail.encodePrettily());
-					_logger.trace("userSnack :: {}", userSnack.encodePrettily());
-					
 					JsonObject t = new JsonObject();
 					t.mergeIn(userSnack).mergeIn(snackDetail);
 					fullSnacks.add(t);
 				}
 			}
-		}
-		_logger.trace("Combined snack details :: {}", fullSnacks.encodePrettily());
-		
+		}	
 		return fullSnacks;
+	}
+	
+	public static synchronized String getSnackName(int snackId) {
+		for(Object obj : snacks) {
+			JsonObject snackDetail = (JsonObject) obj;
+			if(snackDetail.getInteger("snackId") == snackId){
+				return snackDetail.getString("snackName");
+			}
+		}
+		return null;
 	}
 	
 	
@@ -73,7 +76,7 @@ public class SnackRoller {
 		
 		// TODO - Might need to have a unique Math.random() for each thread later
 		double roll = Math.random();
-		//_logger.trace("Current roll :: {}", roll);
+		_logger.trace("Current roll :: {}", roll);
 		
 		int result = 0;
 		for(Map.Entry<Integer, Double> entry : snackVal.entrySet()) {
@@ -82,7 +85,7 @@ public class SnackRoller {
 				break;
 			}
 		}
-		//_logger.trace("Result :: {}", result);
+		_logger.trace("Result :: {}", result);
 		
 		JsonObject snack = null;
 		// Search for the key in the JsonArray to get the snack details
@@ -103,7 +106,7 @@ public class SnackRoller {
 	
 	public static synchronized int getSnackQuantity(long userId, int snackId) {
 		JsonArray userSnacks = UserSnacksDAO.selectUserSnacksById(userId);
-		_logger.info("CURRENT USER SNACKS :: {}", userSnacks.encodePrettily());
+		//_logger.trace("CURRENT USER SNACKS :: {}", userSnacks.encodePrettily());
 		for(Object obj : userSnacks) {
 			JsonObject userSnack = (JsonObject) obj;
 			if(userSnack.getInteger("snackId") == snackId) {

@@ -142,6 +142,7 @@ public class DebugPage {
 	public static void rollForDonutDebug(ButtonInteractionEvent event, JsonObject userJson) {
 		JsonObject snack = SnackRoller.rollForSnack();
 		_logger.debug("Rolled snack :: {}", snack.encodePrettily());
+		_logger.debug("User :: {}", userJson.getString("userTag"));
 		long userId = userJson.getLong("userId");
 		int snackId = snack.getInteger("snackId");
 		
