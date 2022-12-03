@@ -35,6 +35,8 @@ public interface Buttons {
 	final String MAIN_TO_QUIZ_ID = "MAIN_TO_QUIZ_ID";
 	final String MAIN_TO_QUIZ_LABEL = "Bible Quiz";
 	
+	final String MAIN_TO_DONATE_ID = "MAIN_TO_DONATE_ID";
+	final String MAIN_TO_DONATE_LABEL = "Donate Tokens";
 	
 	/*
 	 * Roll Page
@@ -49,4 +51,36 @@ public interface Buttons {
 	final String ROLL_AGAIN_DONUT_ID = "ROLL_AGAIN_DONUT_ID";
 	final String ROLL_AGAIN_DONUT_LABEL = "Spend Another Token";
 	
+	
+	
+	
+	/*
+	 * Quiz Page(s)
+	 */
+	final String QUIZ_TO_MAIN_ID = "QUIZ_TO_MAIN_ID";
+	final String QUIZ_TO_MAIN_LABEL = "Back";
+	
+	final String START_QUIZ_ID = "START_QUIZ_ID";
+	final String START_QUIZ_LABEL = "Start Quiz";
+	
+	
+	/*
+	 * Inventory
+	 */
+	final String INVENTORY_TO_MAIN_ID = "INVENTORY_TO_MAIN_ID";
+	final String INVENTORY_TO_MAIN_LABEL = "Back";
+	
+	
+	/*
+	 * Redeem
+	 */
+	final String REDEEM_TO_MAIN_ID = "REDEEM_TO_MAIN_ID";
+	final String REDEEM_TO_MAIN_LABEL = "Back";
+	
+	
+	/*
+	 * Done
+	 */
+	final String DONATE_TO_MAIN_ID = "DONATE_TO_MAIN_ID";
+	final String DONATE_TO_MAIN_LABEL = "Back";
 }

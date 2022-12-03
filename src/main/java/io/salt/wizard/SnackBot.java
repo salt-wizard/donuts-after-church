@@ -20,9 +20,14 @@ import io.salt.wizard.db.SnacksDAO;
 import io.salt.wizard.db.UserDAO;
 import io.salt.wizard.db.UserSnacksDAO;
 import io.salt.wizard.pages.DebugPage;
-import io.salt.wizard.pages.RollPage;
-import io.salt.wizard.pages.MainMenu;
+import io.salt.wizard.pages.InventoryPage;
+import io.salt.wizard.pages.MenuPage;
 import io.salt.wizard.pages.Page;
+import io.salt.wizard.pages.donate.DonatePage;
+import io.salt.wizard.pages.AbstractPage;
+import io.salt.wizard.pages.quiz.StartPage;
+import io.salt.wizard.pages.redeem.RedeemPage;
+import io.salt.wizard.pages.roll.RollPage;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -97,6 +102,10 @@ public class SnackBot extends ListenerAdapter {
 			
 			jda.upsertCommand(SlashCommands.MENU, "This bot returns info").queue();
 			jda.upsertCommand(SlashCommands.ROLL, "Give a token for a random donut.").queue();
+			jda.upsertCommand(SlashCommands.QUIZ, "Start the bible quiz.").queue();
+			jda.upsertCommand(SlashCommands.INVENTORY, "Open your inventory.").queue();
+			jda.upsertCommand(SlashCommands.REDEEM, "Redeem token.").queue();
+			jda.upsertCommand(SlashCommands.DONATE, "Donate tokens.").queue();
 			jda.upsertCommand(SlashCommands.CREDITS, "Return credits").queue();
 			jda.upsertCommand("debug", "Debug menu - Remove later").queue();
 			
@@ -116,19 +125,34 @@ public class SnackBot extends ListenerAdapter {
 		JsonObject userJson = validateUser(_user);
 
 		// Creating pages...
-		Page mainMenu = new MainMenu();
-		RollPage rollPage = new RollPage();
-		
+		Page mainMenu = new MenuPage(userJson);
+		RollPage rollPage = new RollPage(userJson);
+		Page quizStartPage = new StartPage(userJson);
+		Page inventoryPage = new InventoryPage(userJson);
+		Page redeemPage = new RedeemPage(userJson);
+		Page donatePage = new DonatePage(userJson);
 		
 		switch(event.getName()) {
 			case "debug":
 				DebugPage.returnDebugPage(event, userJson);
 				break;
 			case SlashCommands.MENU:
-				mainMenu.returnPage(event, userJson);
+				mainMenu.returnPage(event);
 				break;
 			case SlashCommands.ROLL:
-				rollPage.returnPage(event, userJson);
+				rollPage.returnPage(event);
+				break;
+			case SlashCommands.QUIZ:
+				quizStartPage.returnPage(event);
+				break;
+			case SlashCommands.INVENTORY:
+				inventoryPage.returnPage(event);
+				break;
+			case SlashCommands.REDEEM:
+				redeemPage.returnPage(event);
+				break;
+			case SlashCommands.DONATE:
+				donatePage.returnPage(event);
 				break;
 			case SlashCommands.CREDITS:
 				String author = "Author: salt_wizard#1029";
@@ -148,8 +172,12 @@ public class SnackBot extends ListenerAdapter {
 		JsonObject userJson = validateUser(_user);
 
 		// Creating pages...
-		Page mainMenu = new MainMenu();
-		RollPage rollPage = new RollPage();
+		Page mainMenu = new MenuPage(userJson);
+		RollPage rollPage = new RollPage(userJson);
+		Page quizStartPage = new StartPage(userJson);
+		Page inventoryPage = new InventoryPage(userJson);
+		Page redeemPage = new RedeemPage(userJson);
+		Page donatePage = new DonatePage(userJson);
 		
 		_logger.info("User :: {}", userJson.encodePrettily());
 		
@@ -175,24 +203,55 @@ public class SnackBot extends ListenerAdapter {
 				
 			// Main Page
 			case Buttons.MAIN_TO_ROLL_ID:
-				rollPage.returnPage(event, userJson);
+				rollPage.returnPage(event);
+				break;
+			case Buttons.MAIN_TO_QUIZ_ID:
+				quizStartPage.returnPage(event);
+				break;
+			case Buttons.MAIN_TO_INVENTORY_ID:
+				inventoryPage.returnPage(event);
+				break;
+			case Buttons.MAIN_TO_REDEEM_ID:
+				redeemPage.returnPage(event);
+				break;
+			case Buttons.MAIN_TO_DONATE_ID:
+				donatePage.returnPage(event);
 				break;
 				
 				
 				
 			// Roll Page
 			case Buttons.ROLL_TO_MAIN_ID:
-				mainMenu.returnPage(event, userJson);
+				mainMenu.returnPage(event);
 				break;
 			case Buttons.ROLL_GET_DONUT_ID:
-				rollPage.rollForDonut(event, userJson);
+				rollPage.rollForDonut(event);
 				break;
 			case Buttons.ROLL_AGAIN_DONUT_ID:
-				rollPage.rollForDonut(event, userJson);
+				rollPage.rollForDonut(event);
 				break;
 				
 				
+			// Quiz Start
+			case Buttons.QUIZ_TO_MAIN_ID:
+				mainMenu.returnPage(event);
+				break;
 				
+				
+			// Inventory
+			case Buttons.INVENTORY_TO_MAIN_ID:
+				mainMenu.returnPage(event);
+				break;
+			
+			// Redeem
+			case Buttons.REDEEM_TO_MAIN_ID:
+				mainMenu.returnPage(event);
+				break;
+				
+			// Donate
+			case Buttons.DONATE_TO_MAIN_ID:
+				mainMenu.returnPage(event);
+				break;
 				
 				
 			default:

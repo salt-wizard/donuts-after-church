@@ -38,8 +38,6 @@ import net.dv8tion.jda.api.utils.messages.MessageEditData;
 public class DebugPage {
 	private static final Logger _logger = LoggerFactory.getLogger(DebugPage.class);
 	
-	
-	
 	private static MessageCreateData createDebugPage(GenericEvent event, JsonObject userJson) {	
 		int tokenCount = userJson.getInteger("tokens");
 		

@@ -1,4 +1,4 @@
-package io.salt.wizard.pages;
+package io.salt.wizard.pages.roll;
 
 import java.awt.Color;
 import java.io.FileInputStream;
@@ -18,6 +18,7 @@ import io.salt.wizard.SnackRoller;
 import io.salt.wizard.actions.TokenHandler;
 import io.salt.wizard.db.UserDAO;
 import io.salt.wizard.db.UserSnacksDAO;
+import io.salt.wizard.pages.Page;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -41,8 +42,8 @@ import net.dv8tion.jda.api.utils.messages.MessageData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
-public class RollPage {
-	private final Logger _logger = LoggerFactory.getLogger(RollPage.class);
+public class RollPage extends Page {
+	private final Logger _logger = LoggerFactory.getLogger(this.getClass());
 	
 	private final String TITLE = "Donut Gachapon";
 	private final String DESCRIPTION_MAIN = 
@@ -59,7 +60,16 @@ public class RollPage {
 	private final String TOKEN_FIELD_TITLE = "Tokens";
 	private final String TOKEN_FIELD_DESC = "Current tokens: **${tokens}**";
 	
-	public RollPage() {}
+	public RollPage(JsonObject userJson) {
+		super(userJson);
+	}
+	
+	@Override
+	protected void setSubMapping() {
+		int tokenCount = userJson.getInteger("tokens");
+		valuesMap = new HashMap<>();
+		valuesMap.put("tokens", tokenCount + "");
+	}
 	
 	/**
 	 * Constructs the embed
@@ -74,11 +84,10 @@ public class RollPage {
 		return eb.build();
 	}
 	
-	private MessageData createPage(GenericEvent event, JsonObject userJson) {	
+	protected MessageData buildPage(GenericEvent event) {	
 		int tokenCount = userJson.getInteger("tokens");
-		Map<String, String> valuesMap = new HashMap<>();
-		valuesMap.put("tokens", tokenCount + "");
 		
+		setSubMapping();
 		MessageEmbed me = buildEmbed(valuesMap);
 		
 		Button rollButton = Button.success(Buttons.ROLL_GET_DONUT_ID, Buttons.ROLL_GET_DONUT_LABEL);
@@ -114,23 +123,6 @@ public class RollPage {
 
 		return data;
 	}
-	
-	/**
-	 * Menu is created on slash command, edited on existing message through button interaction.
-	 * @param event
-	 * @param userJson
-	 */
-	public void returnPage(GenericEvent event, JsonObject userJson) {
-		if(event instanceof SlashCommandInteractionEvent) {
-			MessageCreateData data = (MessageCreateData) createPage(event, userJson);
-			((IReplyCallback) event).reply(data).setEphemeral(true).queue();
-		}
-		if(event instanceof ButtonInteractionEvent) {
-			MessageEditData data = (MessageEditData) createPage(event, userJson);
-			((IMessageEditCallback) event).editMessage(data).queue();
-		}
-	}
-	
 	
 	private MessageEditData createRollResultPage(GenericEvent event, JsonObject userJson, String donut) {	
 		int tokenCount = userJson.getInteger("tokens");
@@ -175,7 +167,7 @@ public class RollPage {
 		return donuts.toString();
 	}
 	
-	public void rollForDonut(ButtonInteractionEvent event, JsonObject userJson) {
+	public void rollForDonut(ButtonInteractionEvent event) {
 		int tokenCount = userJson.getInteger("tokens");
 		
 		int snackId = -1;
