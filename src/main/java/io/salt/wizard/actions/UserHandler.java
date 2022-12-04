@@ -12,8 +12,8 @@ import io.vertx.core.json.JsonObject;
  * @author salt_wizard
  *
  */
-public class TokenHandler {
-	private static final Logger _logger = LoggerFactory.getLogger(TokenHandler.class);
+public class UserHandler {
+	private static final Logger _logger = LoggerFactory.getLogger(UserHandler.class);
 	
 	public static JsonObject incrementToken(JsonObject userJson, int inc) {
 		int newTokens = userJson.getInteger("tokens") + inc;
@@ -30,5 +30,21 @@ public class TokenHandler {
 			_logger.trace("Decrementing user {}'s tokens to {}.", userJson.getString("userTag"), newTokens);
 			return UserDAO.updateUserTokens(userJson.getLong("userId"), newTokens);
 		}
+	}
+	
+	public static JsonObject incrementDonated(JsonObject userJson, int inc) {
+		int newTokens = userJson.getInteger("donated") + inc;
+		_logger.trace("Incrementing user {}'s donated to {}.", userJson.getString("userTag"), newTokens);
+		return UserDAO.updateUserDonated(userJson.getLong("userId"), newTokens);
+	}
+	
+	public static JsonObject incrementBlessing(JsonObject userJson, int inc) {
+		int newTokens = userJson.getInteger("blessing") + inc;
+		_logger.trace("Incrementing user {}'s blessing to {}.", userJson.getString("userTag"), newTokens);
+		return UserDAO.updateUserBlessing(userJson.getLong("userId"), newTokens);
+	}
+	
+	public static JsonObject updateLastRedeem(JsonObject userJson) {
+		return UserDAO.updateLastRedeem(userJson.getLong("userId"));
 	}
 }

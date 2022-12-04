@@ -10,8 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.salt.wizard.Buttons;
+import io.salt.wizard.DonutEmojis;
 import io.salt.wizard.SnackRoller;
-import io.salt.wizard.actions.TokenHandler;
+import io.salt.wizard.actions.UserHandler;
 import io.salt.wizard.db.UserDAO;
 import io.salt.wizard.db.UserSnacksDAO;
 import io.vertx.core.json.JsonArray;
@@ -46,7 +47,7 @@ public class DebugPage {
 		eb.setTitle("Debug Menu")
 		.setColor(0xc7d8a9)
 		.setDescription("Used for development purposes. Make sure to remove on release.")
-		.addField("Tokens", "Current tokens: **" + tokenCount + "**", false)
+		.addField("Tokens", "Current tokens: " + DonutEmojis.token + "**" + tokenCount + "**", false)
 		.addField("Donuts", donuts, false);
 		//.addBlankField(false);
 		MessageEmbed me = eb.build();
@@ -114,25 +115,25 @@ public class DebugPage {
 	}
 	
 	public static void incrementToken(ButtonInteractionEvent event, JsonObject userJson) {
-		userJson = TokenHandler.incrementToken(userJson, 1);
+		userJson = UserHandler.incrementToken(userJson, 1);
 		MessageEditData data = editDebugPage(event, userJson);
 		event.editMessage(data).queue();
 	}
 	
 	public static void decrementToken(ButtonInteractionEvent event, JsonObject userJson) {
-		userJson = TokenHandler.decrementToken(userJson, 1);
+		userJson = UserHandler.decrementToken(userJson, 1);
 		MessageEditData data = editDebugPage(event, userJson);
 		event.editMessage(data).queue();
 	}
 	
 	public static void increment10Tokens(ButtonInteractionEvent event, JsonObject userJson) {
-		userJson = TokenHandler.incrementToken(userJson, 10);
+		userJson = UserHandler.incrementToken(userJson, 10);
 		MessageEditData data = editDebugPage(event, userJson);
 		event.editMessage(data).queue();
 	}
 	
 	public static void decrement10Tokens(ButtonInteractionEvent event, JsonObject userJson) {
-		userJson = TokenHandler.decrementToken(userJson, 10);
+		userJson = UserHandler.decrementToken(userJson, 10);
 		MessageEditData data = editDebugPage(event, userJson);
 		event.editMessage(data).queue();
 	}

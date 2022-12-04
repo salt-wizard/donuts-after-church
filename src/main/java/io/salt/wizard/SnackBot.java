@@ -14,7 +14,7 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.salt.wizard.actions.TokenHandler;
+import io.salt.wizard.actions.UserHandler;
 import io.salt.wizard.db.HikariCPProvider;
 import io.salt.wizard.db.SnacksDAO;
 import io.salt.wizard.db.UserDAO;
@@ -24,6 +24,7 @@ import io.salt.wizard.pages.InventoryPage;
 import io.salt.wizard.pages.MenuPage;
 import io.salt.wizard.pages.Page;
 import io.salt.wizard.pages.donate.DonatePage;
+import io.salt.wizard.pages.donate.DonateResultPage;
 import io.salt.wizard.pages.AbstractPage;
 import io.salt.wizard.pages.quiz.StartPage;
 import io.salt.wizard.pages.redeem.RedeemPage;
@@ -178,6 +179,7 @@ public class SnackBot extends ListenerAdapter {
 		Page inventoryPage = new InventoryPage(userJson);
 		Page redeemPage = new RedeemPage(userJson);
 		Page donatePage = new DonatePage(userJson);
+		Page donateResultPage = new DonateResultPage(userJson);
 		
 		_logger.info("User :: {}", userJson.encodePrettily());
 		
@@ -251,6 +253,10 @@ public class SnackBot extends ListenerAdapter {
 			// Donate
 			case Buttons.DONATE_TO_MAIN_ID:
 				mainMenu.returnPage(event);
+				break;
+			case Buttons.DONATE_TO_CHAT_ID:
+				((DonateResultPage) donateResultPage).donateToken(event);
+				donateResultPage.returnPage(event);
 				break;
 				
 				

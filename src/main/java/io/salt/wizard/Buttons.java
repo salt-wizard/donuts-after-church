@@ -77,10 +77,17 @@ public interface Buttons {
 	final String REDEEM_TO_MAIN_ID = "REDEEM_TO_MAIN_ID";
 	final String REDEEM_TO_MAIN_LABEL = "Back";
 	
+	final String REDEEM_TOKEN_ID = "REDEEM_TOKEN_ID";
+	final String REDEEM_TOKEN_LABEL = "Redeem";
+	
 	
 	/*
-	 * Done
+	 * Donate
 	 */
 	final String DONATE_TO_MAIN_ID = "DONATE_TO_MAIN_ID";
 	final String DONATE_TO_MAIN_LABEL = "Back";
+	
+	final String DONATE_TO_CHAT_ID = "DONATE_TO_CHAT_ID";
+	final String DONATE_TO_CHAT_LABEL = "Donate token";
+	
 }

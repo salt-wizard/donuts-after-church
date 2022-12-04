@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import io.salt.wizard.Buttons;
 import io.salt.wizard.SnackRoller;
-import io.salt.wizard.actions.TokenHandler;
+import io.salt.wizard.actions.UserHandler;
 import io.salt.wizard.db.UserDAO;
 import io.salt.wizard.db.UserSnacksDAO;
 import io.salt.wizard.pages.Page;
@@ -173,7 +173,7 @@ public class RollPage extends Page {
 		int snackId = -1;
 		if(tokenCount > 0) {
 			// Decrement token, roll for snack
-			userJson = TokenHandler.decrementToken(userJson, 1);
+			userJson = UserHandler.decrementToken(userJson, 1);
 			JsonObject snack = SnackRoller.rollForSnack();
 
 			// Update the donut count

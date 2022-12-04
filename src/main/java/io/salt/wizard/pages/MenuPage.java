@@ -16,6 +16,8 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.entities.emoji.CustomEmoji;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -46,11 +48,10 @@ public class MenuPage extends Page {
 	protected MessageEmbed buildEmbed() {
 		EmbedBuilder eb = new EmbedBuilder();
 		eb.setTitle("Main Menu")
-		.setColor(Color.pink)
+		.setColor(0xc7d8a9)
 		.setDescription("Main Menu Description")
-		.addField("title of field", "test of field", false)
-		.addBlankField(false);
-		//.setImage("attachment://test.png");
+		.addField("title of field", "test of field <:abicoin:1048659456986185759>", false)
+		.addBlankField(false).setImage(null);
 		return eb.build();
 	}
 	
@@ -87,6 +88,7 @@ public class MenuPage extends Page {
 							ActionRow.of(invButton, rollButton, redeemButton, quizButton),
 							ActionRow.of(donateButton)
 					)
+					.setReplace(true)
 					.build();
 		}
 
