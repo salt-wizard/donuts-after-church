@@ -8,4 +8,5 @@ package io.salt.wizard;
  */
 public interface DonutEmojis {
 	public final String token = "<:abicoin:1048718731536252978>";
+	public final String loading = "<a:loading:1058152043153461288>";
 }

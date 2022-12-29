@@ -31,8 +31,7 @@ public class UserDAO {
 	private static final String UPDATE_USER_TOKEN = "CALL UPDATE_USER_TOKENS(?, ?)";
 	private static final String UPDATE_USER_DONATED = "CALL UPDATE_USER_DONATED(?, ?)";
 	private static final String UPDATE_USER_BLESSING = "CALL UPDATE_USER_BLESSING(?, ?)";
-	
-	private static final String UPDATE_LAST_REDEEM = "UPDATE USERS SET LAST_REDEEM = ? WHERE USERID = ?;";
+	private static final String UPDATE_USER_CLAIMED = "CALL UPDATE_USER_CLAIMED(?, ?)";
 	
 	private static final int secondsInDay = 86400;
 	
@@ -212,11 +211,11 @@ public class UserDAO {
 		
 		try (Connection conn = HikariCPProvider.getConnection();) {
 			
-			CallableStatement cs = conn.prepareCall(UPDATE_LAST_REDEEM);
+			CallableStatement cs = conn.prepareCall(UPDATE_USER_CLAIMED);
 			int index = 1;
 			cs.setTimestamp(index++, Timestamp.from(Instant.now()));
 			cs.setLong(index++, userId);
-
+			
 			ResultSet rs = cs.executeQuery();
 			while(rs.next()) {
 				result.put("userId",rs.getLong("USER_ID"));

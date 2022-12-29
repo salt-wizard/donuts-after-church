@@ -1,11 +1,8 @@
 package io.salt.wizard.pages.redeem;
 
-import java.awt.Color;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Map;
 import java.sql.Timestamp;
 
 import org.apache.commons.text.StringSubstitutor;
@@ -88,29 +85,34 @@ public class RedeemPage extends Page {
 	 */
 	@Override
 	protected MessageData buildPage(GenericEvent event) {
-		int tokenCount = userJson.getInteger("tokens");
 		setSubMapping();
 		
 		MessageEmbed me = buildEmbed();
 
+		long diff = returnLastRedeemInSeconds();
+		
 		Button redeemButton = Button.success(Buttons.REDEEM_TOKEN_ID, Buttons.REDEEM_TOKEN_LABEL);
 		Button backButton = Button.secondary(Buttons.REDEEM_TO_MAIN_ID, Buttons.REDEEM_TO_MAIN_LABEL);
+		
+		// Only have redeem button if valid...
+		ActionRow row = null;
+		if(diff >= secondsInDay) {
+			row = ActionRow.of(redeemButton, backButton);
+		} else {
+			row = ActionRow.of(backButton);
+		}
 		
 		MessageData data = null;
 		if(event instanceof SlashCommandInteractionEvent) {
 			data = new MessageCreateBuilder()
 						.addEmbeds(me)
-						.setComponents(
-								ActionRow.of(redeemButton, backButton)
-						)
+						.setComponents( row )
 						.build();
 		}
 		if(event instanceof ButtonInteractionEvent) {
 			data = new MessageEditBuilder()
 					.setEmbeds(me)
-					.setComponents(
-							ActionRow.of(redeemButton, backButton)
-					)
+					.setComponents( row )
 					.build();
 		}
 

@@ -28,6 +28,7 @@ import io.salt.wizard.pages.donate.DonateResultPage;
 import io.salt.wizard.pages.AbstractPage;
 import io.salt.wizard.pages.quiz.StartPage;
 import io.salt.wizard.pages.redeem.RedeemPage;
+import io.salt.wizard.pages.redeem.RedeemedPage;
 import io.salt.wizard.pages.roll.RollPage;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -95,7 +96,7 @@ public class SnackBot extends ListenerAdapter {
 			JDA jda = JDABuilder
 					.createDefault(PRIVATE_TOKEN)
 					.addEventListeners(new SnackBot())
-					.setActivity(Activity.competing(" snack collecting."))
+					.setActivity(Activity.competing(" donut collecting."))
 					.enableIntents(gatewayIntents)
 					.setStatus(OnlineStatus.ONLINE)
 					.build();
@@ -178,8 +179,10 @@ public class SnackBot extends ListenerAdapter {
 		Page quizStartPage = new StartPage(userJson);
 		Page inventoryPage = new InventoryPage(userJson);
 		Page redeemPage = new RedeemPage(userJson);
+		Page redeemedPage = new RedeemedPage(userJson);
 		Page donatePage = new DonatePage(userJson);
 		Page donateResultPage = new DonateResultPage(userJson);
+		
 		
 		_logger.info("User :: {}", userJson.encodePrettily());
 		
@@ -248,6 +251,10 @@ public class SnackBot extends ListenerAdapter {
 			// Redeem
 			case Buttons.REDEEM_TO_MAIN_ID:
 				mainMenu.returnPage(event);
+				break;
+			case Buttons.REDEEM_TOKEN_ID:
+				((RedeemedPage)redeemedPage).claimToken(event);
+				redeemedPage.returnPage(event);
 				break;
 				
 			// Donate

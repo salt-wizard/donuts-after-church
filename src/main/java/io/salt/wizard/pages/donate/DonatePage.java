@@ -93,6 +93,7 @@ public class DonatePage extends Page {
 						.setComponents(
 								ActionRow.of(donateButton, backButton)
 						)
+						.setContent(null)
 						.build();
 			} else {
 				data = new MessageCreateBuilder()
@@ -101,6 +102,7 @@ public class DonatePage extends Page {
 						.setComponents(
 								ActionRow.of(backButton)
 						)
+						.setContent(null)
 						.build();
 			}
 
@@ -113,6 +115,7 @@ public class DonatePage extends Page {
 						.setComponents(
 								ActionRow.of(donateButton, backButton)
 						)
+						.setContent(null)
 						.build();
 			} else {
 				data = new MessageEditBuilder()
@@ -121,6 +124,7 @@ public class DonatePage extends Page {
 						.setComponents(
 								ActionRow.of(backButton)
 						)
+						.setContent(null)
 						.build();
 			}
 		}
